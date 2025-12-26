@@ -1,0 +1,674 @@
+basePath: /api/v1
+definitions:
+  handlers.AddBookRequest:
+    properties:
+      author:
+        example: Lemon
+        type: string
+      stock:
+        example: 10
+        type: integer
+      title:
+        example: LemonisTheBestFruit
+        type: string
+    required:
+    - author
+    - stock
+    - title
+    type: object
+  handlers.BorrowBookRequest:
+    properties:
+      book_id:
+        example: 1
+        type: integer
+    required:
+    - book_id
+    type: object
+  handlers.DeleteBookRequest:
+    properties:
+      id:
+        example: 1
+        type: integer
+    required:
+    - id
+    type: object
+  handlers.ErrorResponse:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+    type: object
+  handlers.LoginRequest:
+    properties:
+      password:
+        example: password123
+        type: string
+      username:
+        example: user123
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  handlers.LoginResponse:
+    properties:
+      message:
+        example: 登录成功
+        type: string
+      user:
+        $ref: '#/definitions/models.User'
+    type: object
+  handlers.RegisterRequest:
+    properties:
+      password:
+        example: password123
+        type: string
+      username:
+        example: user123
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  handlers.RegisterResponse:
+    properties:
+      message:
+        example: 用户注册成功
+        type: string
+    type: object
+  handlers.ReturnBookRequest:
+    properties:
+      record_id:
+        example: 1
+        type: integer
+    required:
+    - record_id
+    type: object
+  handlers.SuccessResponse:
+    properties:
+      message:
+        example: 操作成功
+        type: string
+    type: object
+  handlers.UpdateBookRequest:
+    properties:
+      author:
+        example: Lemon
+        type: string
+      id:
+        example: 1
+        type: integer
+      stock:
+        example: 15
+        type: integer
+      title:
+        example: LemonisTheBestFruit
+        type: string
+    required:
+    - author
+    - id
+    - stock
+    - title
+    type: object
+  models.Book:
+    properties:
+      author:
+        example: Lemon
+        type: string
+      id:
+        example: 1
+        type: integer
+      stock:
+        example: 10
+        type: integer
+      title:
+        example: LemonisTheBestFruit
+        type: string
+    type: object
+  models.BorrowRecord:
+    properties:
+      book_id:
+        example: 1
+        type: integer
+      borrowed_at:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+      due_date:
+        example: "2024-02-15T10:30:00Z"
+        type: string
+      id:
+        example: 1
+        type: integer
+      returned_at:
+        example: "2024-01-18T09:15:00Z"
+        type: string
+      user_id:
+        example: 1
+        type: integer
+    type: object
+  models.User:
+    properties:
+      id:
+        example: 123
+        type: integer
+      name:
+        example: lemon
+        type: string
+      role:
+        example: admin
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: hhahaaaahahahahaha
+  title: 图书管理系统 API
+  version: "1.0"
+paths:
+  /admin/books:
+    delete:
+      consumes:
+      - application/json
+      description: 管理员从系统中删除图书
+      parameters:
+      - description: 删除图书请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.DeleteBookRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/handlers.SuccessResponse'
+        "400":
+          description: 请求参数错误或格式不正确
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: 未找到该图书
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: 删除图书
+      tags:
+      - admin
+    post:
+      consumes:
+      - application/json
+      description: 管理员添加新图书到系统
+      parameters:
+      - description: 图书信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.AddBookRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 添加成功
+          schema:
+            $ref: '#/definitions/handlers.SuccessResponse'
+        "400":
+          description: 请求参数错误或格式不正确
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "409":
+          description: 图书已存在
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: 添加图书
+      tags:
+      - admin
+    put:
+      consumes:
+      - application/json
+      description: 管理员更新现有图书信息
+      parameters:
+      - description: 图书更新信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpdateBookRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            $ref: '#/definitions/handlers.SuccessResponse'
+        "400":
+          description: 请求参数错误或格式不正确
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: 未找到该图书
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: 更新图书信息
+      tags:
+      - admin
+  /admin/borrow-records:
+    get:
+      consumes:
+      - application/json
+      description: 管理员查看所有用户的借阅记录
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 借阅记录数组
+          schema:
+            items:
+              $ref: '#/definitions/models.BorrowRecord'
+            type: array
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: 获取所有借阅记录
+      tags:
+      - admin
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: 用户使用用户名和密码登录系统，登录成功后设置Session
+      parameters:
+      - description: 登录信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 登录成功
+          schema:
+            $ref: '#/definitions/handlers.LoginResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: 用户名或密码错误
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: 用户登录
+      tags:
+      - auth
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: 用户注销登录，清除session。需要用户已登录。
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: 注销成功
+        "401":
+          description: 未登录用户无法注销
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: 用户注销
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: 新用户注册账号
+      parameters:
+      - description: 注册信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: 注册成功
+          schema:
+            $ref: '#/definitions/handlers.RegisterResponse'
+        "400":
+          description: 请求参数错误或用户名已存在
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: 用户注册
+      tags:
+      - auth
+  /books:
+    get:
+      consumes:
+      - application/json
+      description: 获取系统中的所有图书列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 图书列表" // 修改1：{array} 改为 {object}，因为返回的是单个模型实例的列表
+          schema:
+            items:
+              $ref: '#/definitions/models.Book'
+            type: array
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: 获取所有图书
+      tags:
+      - books
+  /books/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 通过图书ID获取特定图书的详细信息
+      parameters:
+      - description: 图书ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 图书信息" // 修改1：{array} 改为 {object}，返回单个图书对象
+          schema:
+            $ref: '#/definitions/models.Book'
+        "400":
+          description: 无效的图书ID
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: 图书不存在
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: 服务器内部错误" // 修改3：补充500错误
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: 根据ID获取图书信息
+      tags:
+      - books
+  /books/search:
+    get:
+      consumes:
+      - application/json
+      description: 通过关键词搜索图书，支持标题、作者等字段的模糊匹配
+      parameters:
+      - description: 搜索关键词
+        in: query
+        name: keyword
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 搜索结果" // 此处使用 {array} 正确，因为返回的是图书列表
+          schema:
+            items:
+              $ref: '#/definitions/models.Book'
+            type: array
+        "400":
+          description: 搜索关键词不能为空
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: 根据关键词搜索图书
+      tags:
+      - books
+  /books/search/author:
+    get:
+      consumes:
+      - application/json
+      description: 通过精确的作者名称搜索图书，返回该作者的所有图书
+      parameters:
+      - description: 作者名称
+        in: query
+        name: author
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 搜索到的图书列表
+          schema:
+            items:
+              $ref: '#/definitions/models.Book'
+            type: array
+        "400":
+          description: 作者不能为空
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: 根据作者搜索图书
+      tags:
+      - books
+  /books/search/title:
+    get:
+      consumes:
+      - application/json
+      description: 通过书名中的关键词进行模糊搜索，返回匹配的图书列表
+      parameters:
+      - description: 书名关键词
+        in: query
+        name: titlekeyword
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 搜索到的图书列表
+          schema:
+            items:
+              $ref: '#/definitions/models.Book'
+            type: array
+        "400":
+          description: 书名关键词不能为空
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: 根据书名关键词搜索图书
+      tags:
+      - books
+  /books/title:
+    get:
+      consumes:
+      - application/json
+      description: 通过图书标题获取特定图书的详细信息
+      parameters:
+      - description: 图书标题
+        in: query
+        name: title
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 图书信息
+          schema:
+            $ref: '#/definitions/models.Book'
+        "400":
+          description: 标题不能为空
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: 图书不存在
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: 服务器内部错误" // 修改2：补充500错误
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: 根据标题获取图书信息
+      tags:
+      - books
+  /borrow:
+    post:
+      consumes:
+      - application/json
+      description: 用户借阅指定图书（需要登录）
+      parameters:
+      - description: 借书信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.BorrowBookRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 借书成功
+          schema:
+            $ref: '#/definitions/handlers.SuccessResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: 用户未认证
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: 图书不存在
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "409":
+          description: 库存不足或借阅次数已达上限
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: 借阅图书
+      tags:
+      - borrow
+  /borrow/records:
+    get:
+      consumes:
+      - application/json
+      description: 获取当前用户的所有借阅记录（需要登录）
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 借阅记录数组
+          schema:
+            items:
+              $ref: '#/definitions/models.BorrowRecord'
+            type: array
+        "401":
+          description: 用户未认证
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: 获取用户借阅记录
+      tags:
+      - borrow
+  /borrow/return:
+    post:
+      consumes:
+      - application/json
+      description: 用户归还已借阅的图书（需要登录）
+      parameters:
+      - description: 还书信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.ReturnBookRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 还书成功
+          schema:
+            $ref: '#/definitions/handlers.SuccessResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: 用户未认证
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "403":
+          description: 权限不足
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: 借阅记录或图书不存在
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "409":
+          description: 图书已归还
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: 归还图书
+      tags:
+      - borrow
+securityDefinitions:
+  ApiKeyAuth:
+    description: 用户登录后，Session Cookie会自动携带在请求中
+    in: cookie
+    name: library-session
+    type: apiKey
+swagger: "2.0"
